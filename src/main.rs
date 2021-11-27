@@ -8,9 +8,7 @@ fn main() {
     stdout().flush().unwrap();
     let mut input = String::new();
     stdin().read_line(&mut input).unwrap();
-    let mut parts = input.trim().split_whitespace();
-    let command = parts.next().unwrap();
-    let args = parts.next().unwrap();
+    let command: Vec<&str> = input.trim().split_whitespace().collect();
 
     match unsafe { fork() } {
         Ok(ForkResult::Parent { child, .. }) => match waitpid(child, None) {
@@ -20,8 +18,8 @@ fn main() {
             _ => println!("exit"),
         },
         Ok(ForkResult::Child) => {
-            let dir = CString::new(command.to_string()).unwrap();
-            let arg = CString::new(args.to_string()).unwrap();
+            let dir = CString::new(command[0].to_string()).unwrap();
+            let arg = CString::new(command[1].to_string()).unwrap();
             execv(&dir, &[&dir, &arg]).unwrap();
         }
         Err(_) => panic!("Error"),
